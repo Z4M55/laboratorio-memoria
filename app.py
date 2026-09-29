@@ -84,17 +84,17 @@ def geografia_sonora():
     zonas = [
         {
             "nombre": "Dime Patria",
-            "archivo": "DimePatria.mp3",
+            "archivo": "Dime Patria.mp3",
             "rect": [0, 0, 33, 85],
         },
         {
             "nombre": "Fuego en la Ruta",
-            "archivo": "FuegoenlaRuta.mp3",
+            "archivo": "Fuego en la Ruta.mp3",
             "rect": [33, 0, 34, 85],
         },
         {
             "nombre": "Un Pasaporte Y Tres Valijas",
-            "archivo": "UnPasaporteYTresValijas.mp3",
+            "archivo": "Un Pasaporte Y Tres Valijas.mp3",
             "rect": [67, 0, 33, 85],
         },
         {
@@ -113,7 +113,7 @@ def geografia_sonora():
         if zona["archivo"] is None:
             continue
 
-        audio_path = ROOT / "assets" / "audio" / zona["archivo"]
+        audio_path = ROOT / "assets" / zona["archivo"]
 
         if not audio_path.is_file():
             zona["disponible"] = False
