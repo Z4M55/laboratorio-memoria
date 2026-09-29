@@ -84,17 +84,17 @@ def geografia_sonora():
     zonas = [
         {
             "nombre": "Dime Patria",
-            "archivo": "Dime Patria.mp3",
+            "archivo": "DimePatria.mp3",
             "rect": [0, 0, 33, 85],
         },
         {
             "nombre": "Fuego en la Ruta",
-            "archivo": "Fuego en la Ruta.mp3",
+            "archivo": "Juansinmiedo.mp3",
             "rect": [33, 0, 34, 85],
         },
         {
             "nombre": "Un Pasaporte Y Tres Valijas",
-            "archivo": "Un Pasaporte Y Tres Valijas.mp3",
+            "archivo": "UnPasaporteYTresValijas.mp3",
             "rect": [67, 0, 33, 85],
         },
         {
