@@ -1,0 +1,21 @@
+{
+  "lab_sound": {
+    "nombre": "ESCUCHAR",
+    "subtitulo": "La memoria tiene sonido",
+    "invitacion": "Detente. Escucha. Deja que un sonido te lleve a un lugar.",
+    "materiales": []
+  },
+  "lab_view": {
+    "nombre": "MIRAR",
+    "subtitulo": "Cuando una imagen comienza a sonar",
+    "invitacion": "Mira despacio. ¿Qué escuchas dentro de esta imagen?",
+    "materiales": []
+  },
+  "lab": {
+    "nombre": "RECORDAR",
+    "subtitulo": "Laboratorio de memorias",
+    "invitacion": "Reúne lo que viste y escuchaste. Conviértelo en una huella.",
+    "pregunta": "¿Cómo dibujarías la memoria que despertó esta experiencia?",
+    "materiales": []
+  }
+}

@@ -1,0 +1,41 @@
+<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+*{box-sizing:border-box}body{margin:0;color:#e8dfce;background:#171f20;font:14px system-ui,sans-serif}header{display:flex;justify-content:space-between;gap:12px;align-items:center;margin:12px 0 18px}.tag{color:#b9c3b5;font-size:11px;letter-spacing:.16em}h2{font:28px Georgia;margin:8px 0}.tools{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:14px;background:#263131;border-radius:10px 10px 0 0}button,select,input,textarea{font:inherit}button,select{color:#eadfca;background:#34413e;border:1px solid #637164;border-radius:6px;padding:9px 12px;cursor:pointer}button[aria-pressed=true]{background:#d9a17b;color:#171f20}button:disabled{opacity:.4;cursor:default}:focus-visible{outline:3px solid #d9a17b;outline-offset:2px}label{display:inline-flex;gap:7px;align-items:center}input[type=color]{width:35px;height:34px;background:none;border:0}input[type=range]{width:88px;accent-color:#d9a17b}canvas{display:block;width:100%;height:auto;aspect-ratio:2/1;background:#eee5d4;touch-action:none;cursor:crosshair;border-radius:0 0 8px 8px}.bottom{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-top:12px}textarea{width:100%;margin-top:10px;border:1px solid #637164;background:#243031;color:#ede5d5;border-radius:8px;padding:12px;resize:vertical}small{color:#b9c3b5}.primary{background:#d9a17b;color:#172020}.sound{white-space:nowrap}@media(max-width:500px){header{align-items:flex-start;flex-direction:column}.tools{gap:7px;padding:9px}button,select{padding:8px}canvas{aspect-ratio:4/3}}
+</style>
+<header><div><div class="tag">EL PIZARRÓN / RESPONDE SIN PALABRAS</div><h2>Deja que la mano recuerde.</h2></div><button class="sound" id="sound" aria-pressed="false">▷ Escuchar atmósfera</button></header>
+<div class="tools" role="group" aria-label="Herramientas de dibujo">
+<label>Trazo <select id="tool"><option value="brush">Pincel</option><option value="eraser">Borrador</option></select></label>
+<label>Color <input id="color" type="color" value="#a9533f"></label>
+<label>Grosor <input id="width" type="range" min="2" max="50" value="8"><output id="size">8</output></label>
+<button id="undo" disabled>↶ Deshacer</button><button id="redo" disabled>↷ Rehacer</button><button id="clear">Limpiar</button>
+</div>
+<canvas id="canvas" width="1200" height="600" aria-label="Lienzo para dibujar con ratón, lápiz o dedo"></canvas>
+<div class="bottom"><small id="status" role="status" aria-live="polite">Pinta con ratón, lápiz o dedo.</small><label>Sentimiento <select id="feeling"><option>Sin nombrar</option><option>Nostalgia</option><option>Calma</option><option>Duelo</option><option>Alegría</option><option>Desarraigo</option><option>Esperanza</option></select></label></div>
+<label for="whisper" style="margin-top:14px">Un susurro (opcional)</label><textarea id="whisper" rows="2" maxlength="500" placeholder="Una palabra, un lugar, algo que vuelve…"></textarea>
+<div class="bottom"><small>Borrador local por obra · Descárgalo para conservarlo</small><div><button id="json">Guardar huella (.json)</button> <button class="primary" id="png">Descargar dibujo ↓</button></div></div>
+<small style="display:block;margin-top:14px">Atmósfera sonora sintética, sin voces ni grabaciones. El sonido comienza solo si lo activas.</small>
+<script>
+const obra=__OBRA__;
+const $=id=>document.getElementById(id),canvas=$('canvas'),ctx=canvas.getContext('2d');
+const key='laboratorio-memoria-v1-'+obra.id;
+let strokes=[],redo=[],active=null;
+function paint(s){ctx.save();ctx.globalCompositeOperation=s.tool==='eraser'?'destination-out':'source-over';ctx.strokeStyle=s.color;ctx.fillStyle=s.color;ctx.lineWidth=s.width;ctx.lineCap='round';ctx.lineJoin='round';ctx.beginPath();const p=s.points;ctx.moveTo(p[0][0],p[0][1]);if(p.length===1){ctx.arc(p[0][0],p[0][1],s.width/2,0,Math.PI*2);ctx.fill()}else{for(let i=1;i<p.length;i++)ctx.lineTo(p[i][0],p[i][1]);ctx.stroke()}ctx.restore()}
+function render(){ctx.clearRect(0,0,1200,600);strokes.forEach(paint);if(active)paint(active);$('undo').disabled=!strokes.length;$('redo').disabled=!redo.length}
+function data(){return {version:1,obra:obra.id,titulo:obra.titulo,width:1200,height:600,strokes,sentimiento:$('feeling').value,susurro:$('whisper').value}}
+function save(){try{localStorage.setItem(key,JSON.stringify(data()));$('status').textContent='Borrador guardado en este navegador.'}catch(e){$('status').textContent='No se pudo guardar aquí. Descarga tu huella antes de salir.'}}
+try{const d=JSON.parse(localStorage.getItem(key)||'null');if(d&&d.version===1&&Array.isArray(d.strokes)){strokes=d.strokes.filter(s=>['brush','eraser'].includes(s.tool)&&typeof s.color==='string'&&Number.isFinite(s.width)&&s.width>0&&s.width<=50&&Array.isArray(s.points)&&s.points.length&&s.points.every(p=>Array.isArray(p)&&p.length===2&&p.every(Number.isFinite)));$('feeling').value=d.sentimiento||'Sin nombrar';$('whisper').value=d.susurro||'';$('status').textContent='Tu huella anterior está aquí.'}}catch(e){$('status').textContent='El borrador no está disponible. Puedes empezar uno nuevo.'}render();
+function point(e){const r=canvas.getBoundingClientRect();return [(e.clientX-r.left)*1200/r.width,(e.clientY-r.top)*600/r.height]}
+canvas.addEventListener('pointerdown',e=>{if(active||e.button!==0)return;canvas.setPointerCapture(e.pointerId);active={tool:$('tool').value,color:$('color').value,width:Number($('width').value),points:[point(e)],pointer:e.pointerId};render()});
+canvas.addEventListener('pointermove',e=>{if(!active||active.pointer!==e.pointerId)return;active.points.push(point(e));render()});
+function finish(e){if(!active||active.pointer!==e.pointerId)return;delete active.pointer;strokes.push(active);active=null;redo=[];render();save()}
+canvas.addEventListener('pointerup',finish);canvas.addEventListener('pointercancel',finish);canvas.addEventListener('lostpointercapture',finish);
+$('undo').onclick=()=>{if(strokes.length)redo.push(strokes.pop());render();save()};$('redo').onclick=()=>{if(redo.length)strokes.push(redo.pop());render();save()};
+$('clear').onclick=()=>{if(!strokes.length)return;if(confirm('¿Limpiar el dibujo de esta obra? Descarga primero si quieres conservarlo.')){strokes=[];redo=[];render();save()}};
+$('width').oninput=()=>{$('size').value=$('width').value};$('feeling').onchange=save;$('whisper').oninput=save;
+function download(blob,name){const a=document.createElement('a'),url=URL.createObjectURL(blob);a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)}
+$('png').onclick=()=>{const out=document.createElement('canvas');out.width=1200;out.height=600;const c=out.getContext('2d');c.fillStyle='#eee5d4';c.fillRect(0,0,1200,600);c.drawImage(canvas,0,0);out.toBlob(b=>{if(b)download(b,'huella-'+obra.id+'.png')},'image/png')};
+$('json').onclick=()=>download(new Blob([JSON.stringify(data(),null,2)],{type:'application/json'}),'huella-'+obra.id+'.json');
+let audio=null;
+$('sound').onclick=async()=>{try{if(audio){await audio.close();audio=null;$('sound').textContent='▷ Escuchar atmósfera';$('sound').setAttribute('aria-pressed','false');return}audio=new (window.AudioContext||window.webkitAudioContext)();const gain=audio.createGain();gain.gain.value=.025;gain.connect(audio.destination);[130.81,196,261.63].forEach(f=>{const o=audio.createOscillator();o.type='sine';o.frequency.value=f;o.connect(gain);o.start()});await audio.resume();$('sound').textContent='Ⅱ Detener atmósfera';$('sound').setAttribute('aria-pressed','true')}catch(e){$('status').textContent='El sonido no está disponible en este navegador.'}};
+window.addEventListener('pagehide',()=>{if(audio)audio.close()});
+</script></html>
